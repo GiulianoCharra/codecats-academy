@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Codecats Academy API</title>
+    <style>
+      body {
+        background-color: #2e4052;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        height: 100vh;
+      }
+
+      .fondo {
+        position: absolute;
+        height: 100%;
+        z-index: -100;
+
+        background-repeat: no-repeat;
+        background-position: center 100px;
+        background-size: clamp(300px, calc(40vw + 200px), 900px);
+        background-attachment: fixed;
+
+        filter: blur(clamp(5px, calc(0.5vw + 1px), 10px));
+        opacity: 0.4;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 10vh;
+      }
+
+      h1 {
+        font-size: clamp(2rem, calc(2vw + 2rem), 5rem);
+        margin-bottom: 20px;
+        color: #e9e9e9;
+      }
+
+      p {
+        text-align: center;
+        font-size: 1.3rem;
+        max-width: 70%;
+        color: #ffffff;
+      }
+      .tittle {
+        font-size: 1.5rem;
+        max-width: 70%;
+        color: #ffffff;
+      }
+      ul {
+        list-style: none;
+        margin-top: 20px;
+        padding: 0;
+      }
+      ul li {
+        margin-bottom: 10px;
+        position: relative;
+      }
+
+      ul li:before {
+        position: absolute;
+        top: 5px;
+        left: -20px;
+        content: "";
+        width: 10px;
+        height: 10px;
+        background-color: white;
+      }
+
+      a {
+        color: #ffffff;
+        font-size: 1.4rem;
+      }
+
+      a:hover {
+        color: #749ae0;
+      }
+    </style>
+  </head>
+  <body>
+    <img
+      class="fondo"
+      src="./img/fondo_extra-large.png"
+      alt="Logo Codecats Academy"
+    />
+    <div class="container">
+      <h1>Welcome to the Codecats Academy API</h1>
+      <p>
+        This is the official API for Codecats Academy. You can test some of our endpoints by
+        clicking on the links below.
+      </p>
+      <p>
+        Here is the link of
+        <a
+          href="https://elements.getpostman.com/redirect?entityId=29892749-114f1725-2ac0-4c85-be0a-6bd291c566e2&entityType=collection"
+          target="_blank"
+          >Postman</a
+        >
+        where you try some of our endpoints.
+      </p>
+
+      <p class="tittle">Here are some of our public endpoints:</p>
+      <ul>
+        <li>
+          <a
+            href="/api/courses"
+            target="_blank"
+            >Courses</a
+          >
+        </li>
+        <li>
+          <a
+            href="/api/courses/9fb8ca7f-40b8-47b6-bf7c-a5f058ddb1f3"
+            target="_blank"
+            >Course by Id</a
+          >
+        </li>
+        <li>
+          <a
+            href="/api/users/pepe"
+            target="_blank"
+            >Public user profile</a
+          >
+        </li>
+        <li>
+          <a
+            href="/api/users/pepe/courses"
+            target="_blank"
+            >User's courses</a
+          >
+        </li>
+      </ul>
+    </div>
+  </body>
+</html>
