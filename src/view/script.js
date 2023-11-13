@@ -1,6 +1,9 @@
 import { carrusel } from "./js/carrusel.js";
+import cargarCursos from "./pages/cursos/cursos.js";
 import { buscador } from "./js/buscador.js";
 import { desplegable } from "./js/desplegable.js";
+import cargarCurso from "./pages/curso/curso.js";
+import cargarUsuarios from "./pages/admin/listadoUsuarios/listadoUsuarios.js";
 
 const paginas = {
   principal: "principal",
@@ -9,6 +12,8 @@ const paginas = {
   pago: "pago",
   perfil: "perfil",
   contacto: "contacto",
+  listadoUsuarios: "listadoClientes",
+  frequentQuestions: "frequentQuestions",
 };
 
 const pages = {
@@ -18,6 +23,8 @@ const pages = {
   pago: "./pages/pago/pago.html",
   contacto: "./pages/contacto/contacto.html",
   perfil: "./pages/perfil/perfil.html",
+  listadoUsuarios: "./pages/admin/listadoUsuarios/listadoUsuarios.html",
+  frequentQuestions: "./pages/frequentQuestions/frequentQuestions.html",
 };
 
 const cssPaginaActual = document.getElementById("cssPaginaActual");
@@ -27,6 +34,7 @@ const main = document.querySelector("main");
 let paginaActual = "";
 let urlActual = "";
 let isLoggedIn = false;
+let idCurso = "";
 
 buscador();
 desplegable();
@@ -43,8 +51,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
 addEventListenerWithCheck(document, "click", async (e) => {
   const link = e.target.closest("a");
-  if (!link) {
+  if (!link || !link.dataset.name) {
     return;
+  }
+  if (link.dataset.idCurso) {
+    idCurso = link.dataset.idCurso;
   }
   e.preventDefault();
   let name = link.dataset.name;
@@ -56,7 +67,7 @@ addEventListenerWithCheck(document, "click", async (e) => {
 window.addEventListener("popstate", (e) => {
   let estado = e.state;
   if (estado.body) {
-    animarCargar(estado.body, estado.urlCss, estado.urlJs);
+    animarCargar(estado.body, estado.urlCss);
   }
 });
 
@@ -71,11 +82,6 @@ async function cargarHtml(url) {
 
 function setCss(urlCss) {
   cssPaginaActual.href = urlCss;
-}
-
-async function setJs(urlJs) {
-  let jsInit = await import(urlJs);
-  jsInit.iniciar();
 }
 
 function setHtmlBody(body) {
@@ -94,36 +100,34 @@ async function cargarPagina(urlHtml, name) {
 
 async function cargarPaginaCompleta(urlHtml, name) {
   let urlCss = urlHtml.replace(".html", ".css");
-  let urlJs = urlHtml.replace(".html", ".js");
   let body = await cargarHtml(urlHtml);
-  animarCargar(body, urlCss, urlJs);
-  agregarState(name, urlHtml, body, urlCss, urlJs);
+  animarCargar(body, urlCss);
+  agregarState(name, urlHtml, body, urlCss);
   pushStateHistory(name);
 }
 
 async function cargarPaginaGuardada(datos) {
-  animarCargar(datos.body, datos.urlCss, datos.urlJs);
+  animarCargar(datos.body, datos.urlCss);
   pushStateHistory(datos.name);
 }
 
-async function retrocederPaginaGuardada(body, urlCss, urlJs) {
-  animarCargar(body, urlCss, urlJs);
+async function retrocederPaginaGuardada(body, urlCss) {
+  animarCargar(body, urlCss);
 }
 
-function agregarState(name, urlHtml, body, urlCss, urlJs) {
-  htmlTemplates.set(name, { name, urlHtml, body, urlCss, urlJs });
+function agregarState(name, urlHtml, body, urlCss) {
+  htmlTemplates.set(name, { name, urlHtml, body, urlCss });
 }
 
 function pushStateHistory(name) {
   history.pushState(htmlTemplates.get(name), "", name);
 }
 
-function animarCargar(body, urlCss, urlJS) {
+function animarCargar(body, urlCss) {
   main.classList.add("animacion-salida");
   setTimeout(() => {
     setHtmlBody(body);
     setCss(urlCss);
-    setJs(urlJS);
     verificarEstadoActual();
 
     main.classList.add("animacion-entrada");
@@ -134,20 +138,17 @@ function animarCargar(body, urlCss, urlJS) {
   }, 250);
 }
 
-function verificarEstadoActual() {
+async function verificarEstadoActual() {
   if (paginaActual == paginas.principal) {
     let listadoIntegrantes = document.querySelector(".listado-integrantes");
     carrusel(listadoIntegrantes);
   }
   if (paginaActual == paginas.cursos) {
+    cargarCursos();
   }
   if (paginaActual == paginas.curso) {
-    let desplegables = Array.from(document.getElementsByClassName("desplegable__clases"));
-    desplegables.forEach((desplegable) => {
-      addEventListenerWithCheck(desplegable, "click", () =>
-        mostrarElementos(desplegable, "mostrar-clases")
-      );
-    });
+    let desplegables;
+    await cargarCurso(idCurso);
 
     desplegables = Array.from(document.getElementsByClassName("modulo"));
     desplegables.forEach((desplegable) => {
@@ -155,11 +156,21 @@ function verificarEstadoActual() {
         mostrarElementos(desplegable, "mostrar-datos")
       );
     });
+
+    desplegables = Array.from(document.getElementsByClassName("desplegable__clases"));
+    desplegables.forEach((desplegable) => {
+      addEventListenerWithCheck(desplegable, "click", () =>
+        mostrarElementos(desplegable, "mostrar-clases")
+      );
+    });
   }
   if (paginaActual == paginas.pago) {
     addEventListenerWithCheck(document, "click", (e) => mostrarCalendario(e));
   }
   if (paginaActual == paginas.perfil) {
+  }
+  if (paginaActual == paginas.listadoUsuarios) {
+    cargarUsuarios();
   }
   if (paginaActual == paginas.contacto) {
   }
@@ -237,9 +248,27 @@ window.addEventListener("click", function (event) {
   }
 });
 
+// Mostrar el modal de registro al hacer clic en el botón "Registrarse"
+document.getElementById("openRegisterModal").addEventListener("click", function () {
+  document.getElementById("registerModal").style.display = "block";
+});
+
+// Cerrar el modal de registro al hacer clic en el botón de cierre (×)
+document.getElementById("closeRegisterModal").addEventListener("click", function () {
+  document.getElementById("registerModal").style.display = "none";
+});
+
 document.getElementById("viewProfile").addEventListener("click", async (e) => {
   e.preventDefault();
   const name = "perfil";
+  const url = pages[name];
+
+  cargarPagina(url, name);
+});
+
+document.getElementById("viewUsers").addEventListener("click", async (e) => {
+  e.preventDefault();
+  const name = "listadoUsuarios";
   const url = pages[name];
 
   cargarPagina(url, name);
@@ -284,6 +313,15 @@ document.getElementById("login-form").addEventListener("submit", async function 
       document.getElementById("login-form").reset();
       isLoggedIn = true;
 
+      // Verificar si el usuario es un administrador
+      const isAdmin = userData.role === "admin";
+
+      // Mostrar el botón "Clientes" solo si el usuario es un administrador
+      const viewUsersButton = document.getElementById("viewUsers");
+      if (viewUsersButton) {
+        viewUsersButton.style.display = isAdmin ? "block" : "none";
+      }
+
       const button = document.getElementById("openModal");
       button.innerHTML = `<img class="login__image" src="./assets/images/integrantes/integrante-foto-1.png" alt="User Profile" class="profile-image">`;
     } else {
@@ -297,8 +335,59 @@ document.getElementById("login-form").addEventListener("submit", async function 
   }
 });
 
-document.getElementById("logout").addEventListener("click", logout);
+// Agrega un evento para manejar el envío del formulario de registro
+document.getElementById("register-form").addEventListener("submit", async function (event) {
+  event.preventDefault(); // Evita el envío del formulario predeterminado
+  await registerUser(); // Llama a la función para registrar al usuario utilizando await
+});
 
+// Función para registrar un usuario
+async function registerUser() {
+  const registerForm = document.getElementById("register-form");
+  const username = document.getElementById("usernameRegister").value;
+  const email = document.getElementById("emailRegister").value;
+  const password = document.getElementById("passwordRegister").value;
+
+  const userData = {
+    username,
+    email,
+    password,
+  };
+
+  try {
+    const response = await fetch(
+      "https://codecats-academy-backend.onrender.com/api/auth/register",
+      {
+        method: "POST",
+        body: JSON.stringify(userData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Usuario registrado:", data);
+
+      // Cierra el modal de registro
+      document.getElementById("registerModal").style.display = "none";
+      document.getElementById("register-form").reset();
+      document.getElementById("loginModal").style.display = "block";
+    } else if (response.status === 400) {
+      const errorData = await response.json();
+      document.getElementById("error-message-register").textContent = errorData.message;
+    } else {
+      throw new Error("Error en la solicitud de registro");
+    }
+  } catch (error) {
+    console.error("Error en el registro:", error);
+
+    // Puedes mostrar un mensaje de error o realizar otras acciones en caso de error.
+  }
+}
+
+document.getElementById("logout").addEventListener("click", logout);
 function logout() {
   // Elimina el token del localStorage
   localStorage.removeItem("token");

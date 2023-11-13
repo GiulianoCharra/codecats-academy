@@ -1,13 +1,26 @@
 .seccion_descripcion {
 }
 
+.seccion_informacion_curso {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+#curso {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+}
+
 .imagen_curso {
   width: 500px;
   aspect-ratio: 1;
-  background-image: url(../../assets/images/cursos/react.png);
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
+  object-fit: cover;
 }
 
 .contenedor__descripcion {
